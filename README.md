@@ -1,42 +1,51 @@
-**Overview**
-- **Project:** JoistAPI — a small API built for interview preparation.
-- **Goal:** Mock parts of NewMill's Standard Joist Tools to demonstrate backend skills, packaging, and deployment.
+## JoistAPI
 
-**Purpose**
-- This repository is being prepared for an interview for the Software Engineer role at New Millennium. The implementation focuses on providing a runnable API and a reproducible build using Docker.
+A minimal API created as an interview project to model parts of NewMill's Standard Joist Tools.
 
-**Job / Reference Links**
-- Job posting: https://careers-newmillennium.icims.com/jobs/6725/software-engineer/job
-- Tool being mocked: https://www.newmill.com/design-tools/tools/standard-joist-tools.html
+## Summary
 
-**Quickstart (Windows)**
-Prerequisites: Docker Desktop (running), Git installed, and PowerShell.
+- Frontend: React Native (Expo)
+- Backend: Object Pascal / Delphi (Free Pascal Compiler)
+- Framework: Horse (Delphi/Pascal web framework)
+- Packaging: Docker (multi-stage build)
 
-Build the Docker image (from `JoistAPI` folder):
+## Quickstart
+
+From the `JoistAPI` folder, build and run the containerized backend:
+
 ```powershell
 docker build -t joist-api .
-```
-Run the container (maps port 9000):
-```powershell
 docker run --rm -p 9000:9000 joist-api
 ```
 
-If Docker cannot connect on Windows, ensure Docker Desktop is running and the daemon is available (WSL2 backend or Hyper-V). Use `docker info` to verify.
+The API listens on port 9000 (example endpoint below).
 
-**Git / Local setup**
-- If Git is not installed, install from https://git-scm.com/download/win or via `winget install --id Git.Git -e --source winget`.
-- Set your identity before committing:
-```powershell
-git config --global user.name "Your Name"
-git config --global user.email "you@example.com"
+## API (example)
+
+- Endpoint: `POST /calculate-joist`
+- Payload (JSON):
+
+```json
+{
+  "span": 24.5
+}
 ```
-- If `git` is not on your PATH, add the Git folders to your user PATH (example): `C:\Program Files\Git\cmd` and `C:\Program Files\Git\mingw64\bin`.
 
-**Notes about Dockerfile**
-- The builder stage uses a Debian image and installs `fpc` and `boss` to compile the Pascal project (see [JoistAPI/Dockerfile](JoistAPI/Dockerfile)).
-- The runtime is a slim Debian image with necessary runtime libraries.
+- Response (JSON):
 
-**Next steps**
-- Verify Docker builds locally: `docker build -t joist-api .`.
-- If you want, I can add a small health-check endpoint and a minimal test harness.
+```json
+{
+  "recommendedJoist": "12K3"
+}
+```
+
+The current implementation returns a mock recommendation based on span:
+
+- span ≤ 20ft → `10K1`
+- span > 20ft → `12K3`
+
+## Implementation notes
+
+- The backend contains simplified structural logic intended for demonstration; production systems should rely on verified SJI tables and engineering rules.
+- See `Dockerfile` for build steps and tool choices.
 
