@@ -44,6 +44,17 @@ The current implementation returns a mock recommendation based on span:
 - span ≤ 20ft → `10K1`
 - span > 20ft → `12K3`
 
+
+### API fields
+
+| HTML ID | JSON Key | Data Type | Description |
+|---------|----------|-----------|-------------|
+| design_methodology | design_methodology | String | ASD or LRFD |
+| span               | span               | Float  | Length in feet |
+| dead_load          | dead_load          | Float  | Weight of materials (psf) |
+| live_load          | live_load          | Float  | Moving/temporary loads (psf) |
+| joist_spacing      | joist_spacing      | Float  | Distance between joists (ft) |
+
 ## Implementation notes
 
 - The backend contains simplified structural logic intended for demonstration; production systems should rely on verified SJI tables and engineering rules.

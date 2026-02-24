@@ -3,46 +3,73 @@ program JoistAPI;
 {$MODE DELPHI}{$H+}
 
 uses
-  {$IFDEF UNIX}
-  cthreads,
-  {$ENDIF}
-  sysutils,
-  fpjson,
-  jsonparser,
-  Horse,
-  Horse.CORS;
+  {$IFDEF UNIX}cthreads,{$ENDIF}
+  sysutils, fpjson, jsonparser, Horse, Horse.CORS;
+
+type
+  TJoistRequest = record
+    Series: string;
+    Methodology: string; // ASD or LRFD
+    Span: Double;
+    DeadLoad: Double;
+    LiveLoad: Double;
+    Spacing: Double;
+  end;
 
 procedure CalculateJoist(Req: THorseRequest; Res: THorseResponse; Next: TNextProc);
 var
-  ReqBody: TJSONObject;
-  ResBody: TJSONObject;
-  Span: Double;
-  Designation: string;
+  ReqJson: TJSONObject;
+  ResJson: TJSONObject;
+  Inputs: TJoistRequest;
+  TotalDesignLoad: Double;
 begin
-  ReqBody := TJSONObject(GetJSON(Req.Body));
+  ReqJson := TJSONObject(GetJSON(Req.Body));
   try
-    Span := ReqBody.Get('span', 0.0);
+    Inputs.Series := ReqJson.Get('joist_series', 'K');
+    Inputs.Methodology := ReqJson.Get('design_methodology', 'ASD');
+    Inputs.Span := ReqJson.Get('span', 0.0);
+    Inputs.DeadLoad := ReqJson.Get('dead_load', 0.0);
+    Inputs.LiveLoad := ReqJson.Get('live_load', 0.0);
+    Inputs.Spacing := ReqJson.Get('joist_spacing', 0.0);
 
-    if Span <= 20 then
-      Designation := '10K1'
+    // Engineering Logic: Total Design Load (PLF)
+    // Formula: (Dead Load + Live Load) * Spacing
+    TotalDesignLoad := (Inputs.DeadLoad + Inputs.LiveLoad) * Inputs.Spacing;
+    
+    // In LRFD, loads are typically factored (1.2D + 1.6L)
+    // This is a simplified mock of that behavior
+    if Inputs.Methodology = 'LRFD' then
+      TotalDesignLoad := (Inputs.DeadLoad * 1.2) + (Inputs.LiveLoad * 1.6) * Inputs.Spacing;
+
+    ResJson := TJSONObject.Create;
+    
+    // Mocking the Selection Logic
+    if TotalDesignLoad < 250 then
+    begin
+      ResJson.Add('joist_designation', '12K1');
+      ResJson.Add('joist_self_weight', 5.0);
+      ResJson.Add('bridging_rows_required', 2);
+      ResJson.Add('min_bearing_seat_depth', 2.5);
+    end
     else
-      Designation := '12K3';
+    begin
+      ResJson.Add('joist_designation', '16K3');
+      ResJson.Add('joist_self_weight', 6.5);
+      ResJson.Add('bridging_rows_required', 3);
+      ResJson.Add('min_bearing_seat_depth', 2.5);
+    end;
 
-    ResBody := TJSONObject.Create;
-    ResBody.Add('recommendedJoist', Designation);
-
-    Res.Send(ResBody.AsJSON);
+    ResJson.Add('total_safe_load', TotalDesignLoad + 50); // Mock safe load capacity
+    
+    Res.Send(ResJson.AsJSON);
   finally
-    ReqBody.Free;
-    ResBody.Free;
+    ReqJson.Free;
+    ResJson.Free;
   end;
 end;
 
 begin
   THorse.Use(CORS);
-
   THorse.Post('/calculate-joist', CalculateJoist);
-
-  WriteLn('Joist API listening on port 9000');
   THorse.Listen(9000);
 end.
