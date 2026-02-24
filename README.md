@@ -27,22 +27,32 @@ The API listens on port 9000 (example endpoint below).
 
 ```json
 {
-  "span": 24.5
+  "design_methodology": "ASD",
+  "span": 24.5,
+  "dead_load": 10.0,
+  "live_load": 20.0,
+  "joist_spacing": 4.0
 }
 ```
+
+> All keys listed above are optional – the service will apply defaults when a
+> value is missing (see **API fields** section).
 
 - Response (JSON):
 
 ```json
 {
-  "recommendedJoist": "12K3"
+  "recommendedJoist": "12K3",
+  "selfWeight": 15.2,
+  "maxSpacing": 5.0
 }
 ```
 
-The current implementation returns a mock recommendation based on span:
+The current implementation still returns a mock recommendation based on span
+(and ignores the other inputs):
 
-- span ≤ 20ft → `10K1`
-- span > 20ft → `12K3`
+- span ≤ 20 ft → `10K1`
+- span > 20 ft → `12K3`
 
 
 ### API fields
