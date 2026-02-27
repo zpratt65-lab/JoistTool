@@ -10,9 +10,11 @@ export default function App() {
   const [spacing, setSpacing] = useState('');
   const [result, setResult] = useState(null);
 
+  const HOST = process.env.EXPO_PUBLIC_API_HOST || 'https://joisttool.onrender.com'; 
+
   const calculate = async () => {
     try {
-      const response = await fetch('YOUR_FREE_HOST_URL/calculate-joist', {
+      const response = await fetch(`${HOST}/calculate-joist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
