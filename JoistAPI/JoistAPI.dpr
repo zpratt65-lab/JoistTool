@@ -16,6 +16,28 @@ type
     Spacing: Double;
   end;
 
+procedure AuthenticateRequest(Req: THorseRequest; Res: THorseResponse; Next: TNextProc);
+var
+  ApiKey: string;
+  ProvidedKey: string;
+begin
+  ApiKey := GetEnvironmentVariable('API_KEY');
+  if ApiKey = '' then
+    ApiKey := 'dev-key-change-in-production'; // Default for development
+  
+  ProvidedKey := Req.Headers['X-API-Key'];
+  
+  if ProvidedKey <> ApiKey then
+  begin
+    Res.Status(401);
+    Res.Send('{"error": "Unauthorized: Invalid or missing API key"}')
+  end
+  else
+  begin
+    Next();
+  end;
+end;
+
 procedure CalculateJoist(Req: THorseRequest; Res: THorseResponse; Next: TNextProc);
 var
   ReqJson: TJSONObject;
@@ -70,6 +92,7 @@ end;
 
 begin
   THorse.Use(CORS);
+  THorse.Use(AuthenticateRequest);
   THorse.Post('/calculate-joist', CalculateJoist);
   THorse.Listen(9000);
 end.
