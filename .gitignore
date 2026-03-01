@@ -1,2 +1,4 @@
 JoistAPI/boss-lock.json
 JoistAPI/modules
+node_modules
+.env
